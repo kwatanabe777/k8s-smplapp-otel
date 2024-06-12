@@ -1,0 +1,17 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./containers/nginx/Dockerfile
+    image: ${CONTAINER_REGISTRY}smplapp/nginx-otel:${IMAGE_TAG}
+
+  app:
+    build:
+      context: .
+      dockerfile: ./containers/php-fpm/Dockerfile
+      args:
+        - BUILD_OTEL=${BUILD_OTEL}
+        - BUILD_GRPC=${BUILD_GRPC}
+        - BUILD_PROTOBUF=${BUILD_PROTOBUF}
+    image: ${CONTAINER_REGISTRY}smplapp/app-otel:${IMAGE_TAG}
+

@@ -1,0 +1,13 @@
+; additional php.ini envirionments common
+[PHP]
+short_open_tag = On
+max_execution_time = 30
+max_input_time= 60
+memory_limit = 256M
+post_max_size = 10M
+upload_max_filesize = 10M
+
+[PostgreSQL]
+pgsql.allow_persistent = On
+pgsql.auto_reset_persistent = On
+pgsql.max_persistent = -1

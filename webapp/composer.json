@@ -1,0 +1,55 @@
+{
+    "name": "codeigniter4/appstarter",
+    "description": "CodeIgniter4 starter app",
+    "license": "MIT",
+    "type": "project",
+    "homepage": "https://codeigniter.com",
+    "support": {
+        "forum": "https://forum.codeigniter.com/",
+        "source": "https://github.com/codeigniter4/CodeIgniter4",
+        "slack": "https://codeigniterchat.slack.com"
+    },
+    "require": {
+        "php": "^8.1",
+        "codeigniter4/framework": "^4.0",
+        "open-telemetry/api": "^1.0",
+        "open-telemetry/exporter-otlp": "^1.0",
+        "open-telemetry/opentelemetry-auto-codeigniter": "^0.0.7",
+        "open-telemetry/opentelemetry-auto-http-async": "^1.0",
+        "open-telemetry/opentelemetry-auto-io": "^0.0.11",
+        "open-telemetry/opentelemetry-auto-pdo": "^0.0.13",
+        "open-telemetry/opentelemetry-auto-psr3": "^0.0.6",
+        "open-telemetry/opentelemetry-auto-psr14": "^0.0.2",
+        "open-telemetry/opentelemetry-auto-psr15": "^1.0",
+        "open-telemetry/opentelemetry-auto-psr16": "^0.0.2",
+        "open-telemetry/opentelemetry-auto-psr18": "^1.0",
+        "open-telemetry/sdk": "^1.0",
+        "open-telemetry/transport-grpc": "^1.0"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.9",
+        "mikey179/vfsstream": "^1.6",
+        "phpunit/phpunit": "^10.5.16"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "exclude-from-classmap": [
+            "**/Database/Migrations/**"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Support\\": "tests/_support"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}

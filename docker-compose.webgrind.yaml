@@ -1,0 +1,15 @@
+services:
+  webgrind:
+    #image: jokkedk/webgrind:latest
+    #image: devgeniem/webgrind:latest
+    image: wodby/webgrind:latest
+    hostname: webgrind
+    environment:
+      #- WEBGRIND_STORAGE_DIR=/var/cache/webgrind
+      - WEBGRIND_DEFAULT_TIMEZONE=Asia/Tokyo
+    ports:
+      - "8088:8080"
+    volumes:
+      - ./xdebug:/tmp
+      # - ./xdebug:/tmp/xdebug
+

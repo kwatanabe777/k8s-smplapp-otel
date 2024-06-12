@@ -1,0 +1,5 @@
+; additional php.ini develop envirionments
+[mail function]
+SMTP = localhost
+smtp_port = 25
+

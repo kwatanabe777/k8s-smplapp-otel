@@ -1,0 +1,61 @@
+#worker_processes 3; # default: auto
+
+access_log /dev/stdout main;
+error_log /dev/stderr warn;
+
+# otel global config
+otel_exporter {
+    endpoint ${OTEL_ENDPOINT};
+}
+otel_service_name ${OTEL_SERVICE_NAME};
+
+server {
+    listen 8080;
+    listen [::]:8080;
+
+    root /var/www/webroot;
+    index index.php index.html index.htm;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options "nosniff";
+
+    proxy_read_timeout 300;
+    proxy_connect_timeout 300;
+    proxy_send_timeout 300;
+
+    charset utf-8;
+    server_name _;
+
+    error_page 404 /index.php;
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+
+    location / {
+        # opentelemetry
+        otel_trace ${OTEL_TRACE};
+        otel_trace_context ${OTEL_TRACE_CONTEXT};
+        otel_span_name $request_uri;
+
+        try_files $uri /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        root /var/www/webapp/public;
+
+        include fastcgi_params;
+        ## prefered to unix domain socket
+        #fastcgi_pass php-laravel:9000;
+        fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+		fastcgi_read_timeout 300;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+

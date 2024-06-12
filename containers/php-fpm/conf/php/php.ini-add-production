@@ -1,0 +1,5 @@
+; additional php.ini production envirionments
+[mail function]
+SMTP = mail.tour.ne.jp
+smtp_port = 25
+

@@ -1,0 +1,51 @@
+services:
+  nginx:
+    image: ${CONTAINER_REGISTRY}smplapp/nginx-otel:${IMAGE_TAG}
+    hostname: smplapp-nginx
+    environment:
+      - NGINX_ENVSUBST_FILTER=^OTEL_.*
+      - OTEL_TRACE=on
+      - OTEL_ENDPOINT=otel-collector.tracing.svc.cluster.local:4317
+      - OTEL_SERVICE_NAME=smplapp-nginx
+      - OTEL_TRACE_CONTEXT=propagate
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - fpm_shared:/var/run/php-fpm
+      - ./webroot:/var/www/webroot
+    depends_on:
+      - app
+
+  app:
+    image: ${CONTAINER_REGISTRY}smplapp/app-otel:${IMAGE_TAG}
+    hostname: smplapp-app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - XDEBUG_ENABLED=1
+      - DEV_ENABLED=1
+      - OTEL_PHP_AUTOLOAD_ENABLED=true
+      - OTEL_SERVICE_NAME=smplapp-app
+      #- OTEL_TRACES_EXPORTER=otlp
+      #- OTEL_TRACES_EXPORTER=console
+      - OTEL_TRACES_EXPORTER=none
+      #- OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      #TRANSPORTER PROTOCOLS: http/json, http/protobuf, grpc
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.tracing.svc.cluster.local:4317
+      #- OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.tracing.svc.cluster.local:4318
+      #- OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector.tracing.svc.cluster.local:4317/v1/traces
+      #- OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector.tracing.svc.cluster.local:4317/v1/metrics
+      #- OTEL_METRICS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=console
+      - OTEL_LOGS_EXPORTER=none
+      - OTEL_PROPAGATORS="baggage,tracecontext"
+    volumes:
+      - fpm_shared:/var/run/php-fpm
+      - ./webapp:/var/www/webapp
+      - ./xdebug:/tmp/xdebug
+
+volumes:
+  fpm_shared:
+

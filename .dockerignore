@@ -1,0 +1,4 @@
+xdebug
+docker-compose.*
+Makefile
+setenv.sh
