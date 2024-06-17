@@ -3,11 +3,13 @@ services:
     image: ${CONTAINER_REGISTRY}smplapp/nginx-otel:${IMAGE_TAG}
     hostname: smplapp-nginx
     environment:
-      - NGINX_ENVSUBST_FILTER=^OTEL_.*
+      - NGINX_ENVSUBST_FILTER=^OTEL_.*|^FASTCGI_PARAMS_ADDFILE
       - OTEL_TRACE=on
       - OTEL_ENDPOINT=otel-collector.tracing.svc.cluster.local:4317
       - OTEL_SERVICE_NAME=smplapp-nginx
       - OTEL_TRACE_CONTEXT=propagate
+      #- FASTCGI_PARAMS_ADDFILE=empty
+      - FASTCGI_PARAMS_ADDFILE=fastcgi_params-codeigniter-development
     ports:
       - "8080:8080"
 

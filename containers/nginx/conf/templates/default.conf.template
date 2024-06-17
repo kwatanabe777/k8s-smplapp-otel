@@ -10,6 +10,7 @@ otel_exporter {
 otel_service_name ${OTEL_SERVICE_NAME};
 
 server {
+    server_tokens off; #hide nginx version text
     listen 8080;
     listen [::]:8080;
 
@@ -39,13 +40,19 @@ server {
         otel_trace_context ${OTEL_TRACE_CONTEXT};
         otel_span_name $request_uri;
 
+		#not all files from php-fpm, static files is served from this nginx
+        #try_files $uri $uri/ /index.php?$query_string;
         try_files $uri /index.php?$query_string;
     }
 
     location ~ \.php$ {
         root /var/www/webapp/public;
 
+        # include cgi parameters
         include fastcgi_params;
+		include fastcgi_params-common;
+		include ${FASTCGI_PARAMS_ADDFILE}*;
+
         ## prefered to unix domain socket
         #fastcgi_pass php-laravel:9000;
         fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
