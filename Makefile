@@ -2,8 +2,9 @@
 # containers operation
 #
 .PHONY: build up down login push
+SHELL := /bin/bash #/bin/sh cannnot receive args at . ./setenv.sh
 build:
-	@. ./setenv.sh \
+	@. ./setenv.sh new \
     && set +a \
     && docker compose -f docker-compose.build.yaml build --progress plain \
     && IMAGE_TAG=latest && docker compose -f docker-compose.build.yaml build --progress plain

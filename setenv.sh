@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 ##### set env & shell functions #####
 export PHP_SERVICE_NAME='app'
 export CONTAINER_REGISTRY='harbor.dh1.div1.opendoor.local/'
@@ -22,7 +24,6 @@ export BUILD_PROTOBUF=1
 # gen image tag
 DATE=`date '+%Y%m%d'`
 COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
-ARG1=$1
 new_image_tag() {
   local IMAGE_TAG
   if [ -n "${COMMIT_HASH}" ]; then
@@ -34,16 +35,16 @@ new_image_tag() {
 }
 locallatest_image_tag(){
   local IMAGE_TAG
-  if [ -n "${COMMIT_HASH}" ]; then
-    IMAGE_TAG=$(docker images --format '{{.Tag}}' | grep "${COMMIT_HASH}" | sort -r | head -n 1)
-  else
+  IMAGE_TAG=$(docker images | grep ${CONTAINER_REGISTRY}${PROJECT} | awk '{print $2}' | grep -E '^[0-9]{8}-[0-9a-z]{6}' | sort -r | head -n 1)
+  if [ -z "${IMAGE_TAG}" ]; then
     IMAGE_TAG=$(docker images | grep "${CONTAINER_REGISTRY}${PROJECT}" | grep -E '^[0-9]{8}' | sort -r | head -n 1)
   fi
+  IMAGE_TAG=${IMAGE_TAG:-`new_image_tag`} #fallback
   echo ${IMAGE_TAG}
 }
 determin_image_tag(){
   local IMAGE_TAG
-  if [ "${ARG1}" = "new" ]; then
+  if [ "${1}" = "new" ]; then
     IMAGE_TAG=`new_image_tag`
   else
     IMAGE_TAG=`locallatest_image_tag`
