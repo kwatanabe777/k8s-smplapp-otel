@@ -3,30 +3,30 @@
 #
 .PHONY: build up down login push
 build:
-	. ./setenv.sh \
+	@. ./setenv.sh \
     && set +a \
     && docker compose -f docker-compose.build.yaml build --progress plain \
     && IMAGE_TAG=latest && docker compose -f docker-compose.build.yaml build --progress plain
 
 up:
-	. ./setenv.sh \
+	@. ./setenv.sh \
     && set +a \
     && docker compose up -d \
 
 down:
-	. ./setenv.sh \
+	@. ./setenv.sh \
     && set +a \
     && docker compose down \
 
 #make login USER=your_username PASSWORD=your_password
 login:
-	. ./setenv.sh \
+	@. ./setenv.sh \
     && set +a \
     && echo ${PASSWORD} | docker login --username ${USER} --password-stdin $${CONTAINER_REGISTRY} \
 
 #make push USER=your_username PASSWORD=your_password
 push:
-	. ./setenv.sh \
+	@. ./setenv.sh \
     && set +a \
     && docker compose -f docker-compose.build.yaml push \
     && IMAGE_TAG=latest && docker compose -f docker-compose.build.yaml push
