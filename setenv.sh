@@ -22,6 +22,7 @@ export BUILD_PROTOBUF=1
 
 
 # gen image tag
+ARG1=$1
 DATE=`date '+%Y%m%d'`
 COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
 new_image_tag() {
@@ -44,7 +45,7 @@ locallatest_image_tag(){
 }
 determin_image_tag(){
   local IMAGE_TAG
-  if [ "${1}" = "new" ]; then
+  if [ "${ARG1}" = "new" ]; then
     IMAGE_TAG=`new_image_tag`
   else
     IMAGE_TAG=`locallatest_image_tag`
