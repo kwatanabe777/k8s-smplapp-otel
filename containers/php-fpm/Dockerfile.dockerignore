@@ -1,0 +1,7 @@
+# this dockerignore will be used by php-app build-context
+#  so, webapp/public is ignore target, except for webapp/public/**/*.php (all php file)
+*
+!containers
+!webapp
+ webapp/public/*
+ !webapp/public/**/*.php

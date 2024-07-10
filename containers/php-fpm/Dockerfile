@@ -1,4 +1,4 @@
-FROM php:8.3.7-fpm-alpine3.19
+FROM php:8.3.8-fpm-alpine3.20
 
 ##### build args
 ARG BUILD_OTEL
@@ -100,7 +100,7 @@ RUN chown -R devusr:devgrp . \
         php artisan view:clear && \
         php artisan view:cache && \
         chown -R nginx:nginx storage; \
-	  elif [ -e spark ]; then \
+      elif [ -e spark ]; then \
         php spark cache:clear && \
         php spark logs:clear && \
         chown -R nginx:nginx writable; \
@@ -111,7 +111,8 @@ RUN chown -R devusr:devgrp . \
 # entrypoint creation
 COPY ./containers/php-fpm/entrypoint.sh /
 
-# entrypoint
+# command & entrypoint
+CMD ["php-fpm"]
 ENTRYPOINT ["/entrypoint.sh"]
 
 # switch context user to nginx for security

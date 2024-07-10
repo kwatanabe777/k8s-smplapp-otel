@@ -1,9 +1,9 @@
 #!/bin/bash
 #
 ##### set env & shell functions #####
-export PHP_SERVICE_NAME='app'
+export PROJECT_NAME='smplapp-a'
 export CONTAINER_REGISTRY='harbor.dh1.div1.opendoor.local/'
-export PROJECT='smplapp'
+export PHP_SERVICE_NAME='app'
 
 # For container build options
 # To enable opentelemetry & transporters:
@@ -36,9 +36,9 @@ new_image_tag() {
 }
 locallatest_image_tag(){
   local IMAGE_TAG
-  IMAGE_TAG=$(docker images | grep ${CONTAINER_REGISTRY}${PROJECT} | awk '{print $2}' | grep -E '^[0-9]{8}-[0-9a-z]{6}' | sort -r | head -n 1)
+  IMAGE_TAG=$(docker images | grep ${CONTAINER_REGISTRY}${PROJECT_NAME} | awk '{print $2}' | grep -E '^[0-9]{8}-[0-9a-z]{6}' | sort -r | head -n 1)
   if [ -z "${IMAGE_TAG}" ]; then
-    IMAGE_TAG=$(docker images | grep "${CONTAINER_REGISTRY}${PROJECT}" | grep -E '^[0-9]{8}' | sort -r | head -n 1)
+    IMAGE_TAG=$(docker images | grep "${CONTAINER_REGISTRY}${PROJECT_NAME}" | grep -E '^[0-9]{8}' | sort -r | head -n 1)
   fi
   IMAGE_TAG=${IMAGE_TAG:-`new_image_tag`} #fallback
   echo ${IMAGE_TAG}
@@ -61,6 +61,11 @@ if [ -z "${UID}" ]; then
 	export UID=$(id -u)
 fi
 export GID=$(id -g)
+
+# other environments
+## use docker buildkit for Dockerfile.dockerignore
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
 
 # customize commands from container
 # for get login(-l) shell & run command(-c)

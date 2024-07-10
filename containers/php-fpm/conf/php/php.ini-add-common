@@ -1,5 +1,6 @@
 ; additional php.ini envirionments common
 [PHP]
+expose_php = Off
 short_open_tag = On
 max_execution_time = 30
 max_input_time= 60

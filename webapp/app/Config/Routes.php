@@ -7,6 +7,8 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
+$routes->get('/healthcheck', 'Healthcheck::index');
+
 $routes->get('/info', 'Info::index');
 
 $routes->get('/test', 'Test::index');
