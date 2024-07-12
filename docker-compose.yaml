@@ -50,7 +50,7 @@ services:
       - OTEL_PROPAGATORS="baggage,tracecontext"
     volumes:
       - fpm_shared:/var/run/php-fpm
-      - ./webapp:/var/www/webapp-disc
+      - ./webapp:/var/www/webapp
       - ./xdebug:/tmp/xdebug
 
 volumes:

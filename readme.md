@@ -1,6 +1,6 @@
 # php-fpm containers sample
                                                                     by kwatanabe
-                                                                    last updated:2024-07-11 19:40.
+                                                                    last updated:2024-07-12 18:58.
 ## Development only (container registry already has images)
 - pull & up containers  
 ```bash
@@ -127,11 +127,15 @@ _belows are for opentelemetry's environment variables_
 - OTEL_PROPAGATORS="baggage,tracecontext"
 
 ## Use php & composer command
-pre-defined docker exec wrapped funtions for php & composer command
+pre-defined docker compose/kubectl exec wrapped funtions for php & composer command
+if docker environment, set CMD_ENV to "docker-compose" in setenv.sh
+or if k8s environment, set CMD_ENV to "k8s" in setenv.sh
+**Please note that when bootstrapping an image, the composer command cannot be executed unless it is specified to 'docker-compose'.**
 ```bash
 . ./setenv.sh
 #(only once is needed at current shell)
 ```
+
 - ex) laravel
 ```bash
 php artisan --version

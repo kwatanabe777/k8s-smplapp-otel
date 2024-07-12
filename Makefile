@@ -1,18 +1,30 @@
 ###########################
 # containers operation
 #
-.PHONY: build up down login push
+.PHONY: build pull up down login push
 SHELL := /bin/bash #/bin/sh cannnot receive args at . ./setenv.sh
+# create webapp/public directory temporarily for build nginx container
 build:
 	@. ./setenv.sh new \
     && set +a \
+    && mkdir -p webapp/public \
     && docker compose -f docker-compose.build.yaml build \
     && IMAGE_TAG=latest && docker compose -f docker-compose.build.yaml build
+
+pull:
+	@. ./setenv.sh \
+    && set +a \
+    && IMAGE_TAG=latest && docker compose pull \
 
 up:
 	@. ./setenv.sh \
     && set +a \
     && docker compose up -d \
+
+up-app:
+	@. ./setenv.sh \
+    && set +a \
+    && docker compose up -d ${PHP_SERVICE_NAME}
 
 down:
 	@. ./setenv.sh \
@@ -39,6 +51,8 @@ bootstrap: build up
 
 ###########################
 # framework bootstrapping
+#   firstly only up app-container to rmdir webapp/public
+#     for compose create-projct
 #
 #### psr
 #psr3: logger interface
@@ -46,11 +60,13 @@ bootstrap: build up
 #psr15: http server request handlers
 #psr16: common interface for cache libraries
 #psr18: http client
-bootstrap-laravel: build up
+bootstrap-laravel: build up-app
 	. ./setenv.sh && set +a \
-    && composer create-project laravel/laravel .
+    && container_exec rmdir public \
+    && composer create-project laravel/laravel . \
+    && docker compose up -d
 
-bootstrap-laravel-otel: build up bootstrap-laravel
+bootstrap-laravel-otel: bootstrap-laravel
 	. ./setenv.sh && set +a \
     && composer require open-telemetry/api \
        open-telemetry/sdk \
@@ -66,16 +82,18 @@ bootstrap-laravel-otel: build up bootstrap-laravel
        open-telemetry/opentelemetry-auto-psr18 \
        open-telemetry/opentelemetry-auto-pdo
 
-bootstrap-laravel-otel-grpc: build up bootstrap-laravel-otel
+bootstrap-laravel-otel-grpc: bootstrap-laravel-otel
 	. ./setenv.sh && set +a \
     && composer require open-telemetry/transport-grpc
 
 
-bootstrap-codeigniter: build up
+bootstrap-codeigniter: build up-app
 	. ./setenv.sh && set +a \
-    && composer create-project codeigniter4/appstarter .
+    && container_exec rmdir public \
+    && composer create-project codeigniter4/appstarter . \
+    && docker compose up -d
 
-bootstrap-codeigniter-otel: build up bootstrap-codeigniter
+bootstrap-codeigniter-otel: bootstrap-codeigniter
 	. ./setenv.sh && set +a \
     && composer require open-telemetry/api \
        open-telemetry/sdk \
@@ -91,7 +109,7 @@ bootstrap-codeigniter-otel: build up bootstrap-codeigniter
        open-telemetry/opentelemetry-auto-psr18 \
        open-telemetry/opentelemetry-auto-pdo
 
-bootstrap-codeigniter-otel-grpc: build up bootstrap-codeigniter-otel
+bootstrap-codeigniter-otel-grpc: bootstrap-codeigniter-otel
 	. ./setenv.sh && set +a \
     && composer require open-telemetry/transport-grpc
 
