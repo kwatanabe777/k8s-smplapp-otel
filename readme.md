@@ -1,6 +1,6 @@
 # php-fpm containers sample
                                                                     by kwatanabe
-                                                                    last updated:2024-07-12 18:58.
+                                                                    last updated:2024-09-03 13:39.
 ## Development only (container registry already has images)
 - pull & up containers  
 ```bash
@@ -14,7 +14,7 @@ make down
 
 ## Build nginx+php-fpm containers images
 
-### Configure container build
+### Configure php-fpm container build
 setenv.sh
 ```bash
 export BUILD_OTEL=1      #enable opentelemetry extension
@@ -69,32 +69,44 @@ _configurable in `setenv.sh` by `IMAGE_TAG`_
 **:latest** tag is also created.
 
 ### Push image to registry
-registry & project is defined in .env
-CONTAINER_REGISTRY=${CONTAINER_REGISTRY}
-PROJECT_NAME=${PROJECT_NAME}
+registry & project is defined in setenv.sh  
+project_name is container registry project name
+CONTAINER_REGISTRY=
+PROJECT_NAME=
 ```
 make login USER=xxx PASSWORD=xxx
 make push
 ```
 
 
-## Containers environment variables
+## Containers configurable environment variables
 ### nginx
-- NGINX_ENVSUBST_FILTER=\^OTEL_.\*|\^FASTCGI_PARAMS_ADDFILE  
+- NGINX_ENVSUBST_FILTER=\^NGINX_.\*|\^OTEL_.\*|\^FASTCGI_.\*
   enable ENV variables substituion filter
 
+- NGINX_LISTEN_PORT
+- NGINX_PROXY_READ_TIMEOUT
+- NGINX_PROXY_CONNECT_TIMEOUT
+- NGINX_PROXY_SEND_TIMEOUT
+- FASTCGI_READ_TIMEOUT
 - FASTCGI_PARAMS_ADDFILE=fastcgi_params-codeigniter-development  
   Parameters pre-definition file for pass to php-fpm.    
   This file is included at nginx starting.  
   Located in containers/nginx/conf
   - fastcgi_params-codeigniter-development  
     CI_ENVIRONMENT=development
+  - fastcgi_params-codeigniter-staging  
+    CI_ENVIRONMENT=staging
   - fastcgi_params-codeigniter-production  
     CI_ENVIRONMENT=production
   - fastcgi_params-laravel-development  
     APP_ENV=development
+  - fastcgi_params-laravel-staging  
+    APP_ENV=staging
   - fastcgi_params-laravel-production  
     APP_ENV=production
+  - empty  
+	no additional parameters
   - fastcgi_params-common  
     fastcgi_params-common is always included
 

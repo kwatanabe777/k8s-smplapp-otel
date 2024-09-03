@@ -1,4 +1,4 @@
-FROM php:8.3.8-fpm-alpine3.20
+FROM php:8.3.10-fpm-alpine3.20
 
 ##### build args
 ARG BUILD_OTEL

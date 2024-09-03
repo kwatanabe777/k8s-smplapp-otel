@@ -1,5 +1,5 @@
 # this dockerignore will be used by nginx build-context
-#  so, ignore all, except for webapp/public, but webapp/public/**/*.php(all .phpfile) is isnored
+#  so, ignore all, except for webapp/public, but webapp/public/**/*.php(all .php file) is still ignored.
 *
 !containers
 !webapp/public

@@ -23,6 +23,7 @@ fi
 
 #
 # switch php.ini & php-fpm.conf by development/production environment
+#  (values are overwritten by later one)
 # default is production
 ln -sf ${PHP_CONF_DIR}/php.ini-add-common ${PHP_CONF_DIR}/conf.d/php.ini-add-a-common.ini
 DEV_ENABLED=${DEV_ENABLED:-0}

@@ -12,6 +12,8 @@ COPY  ./containers/nginx/conf /etc/nginx/
 RUN sed -i 's/user  nginx;/#user  nginx;/' /etc/nginx/nginx.conf \
     && sed -i 's/    worker_connections  1024;/    worker_connections  2048;/' /etc/nginx/nginx.conf \
     && sed -i 's/    keepalive_timeout  65;/    keepalive_timeout  65;/' /etc/nginx/nginx.conf \
+    && sed -i 's/    #gzip  on;/    gzip  on;/' /etc/nginx/nginx.conf \
+    && sed -i '/    gzip  on;/a \ \ \ \ gzip_types  text\/plain text\/html text\/css text\/xml text\/javascript application\/javascript application\/json;' /etc/nginx/nginx.conf \
     && sed -i -e '1i load_module modules/ngx_otel_module.so;' /etc/nginx/nginx.conf
 
 # permission adjustment

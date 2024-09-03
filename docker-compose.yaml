@@ -4,13 +4,25 @@ services:
     container_name: ${PROJECT_NAME}-web
     hostname: smplapp-nginx
     environment:
-      - NGINX_ENVSUBST_FILTER=^OTEL_.*|^FASTCGI_PARAMS_ADDFILE
+      - NGINX_ENVSUBST_FILTER=^NGINX_.*|^OTEL_.*|^FASTCGI_.*
+
+      - NGINX_LISTEN_PORT	
+      - NGINX_PROXY_READ_TIMEOUT=300
+      - NGINX_PROXY_CONNECT_TIMEOUT=300
+      - NGINX_PROXY_SEND_TIMEOUT=300
       - OTEL_TRACE=on
       - OTEL_ENDPOINT=otel-collector.tracing.svc.cluster.local:4317
       - OTEL_SERVICE_NAME=${PROJECT_NAME}-web
       - OTEL_TRACE_CONTEXT=propagate
+      - FASTCGI_READ_TIMEOUT=300
       #- FASTCGI_PARAMS_ADDFILE=empty
       - FASTCGI_PARAMS_ADDFILE=fastcgi_params-codeigniter-development
+      #- FASTCGI_PARAMS_ADDFILE=fastcgi_params-codeigniter-staging
+      #- FASTCGI_PARAMS_ADDFILE=fastcgi_params-codeigniter-production
+      #- FASTCGI_PARAMS_ADDFILE=fastcgi_params-laravel-development
+      #- FASTCGI_PARAMS_ADDFILE=fastcgi_params-laravel-staging
+      #- FASTCGI_PARAMS_ADDFILE=fastcgi_params-laravel-production
+
     ports:
       - "8080:8080"
 
