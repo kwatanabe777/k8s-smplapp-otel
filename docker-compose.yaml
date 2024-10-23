@@ -1,12 +1,12 @@
 services:
   web:
-    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/web-otel:${IMAGE_TAG}
-    container_name: ${PROJECT_NAME}-web
-    hostname: smplapp-nginx
+    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/${IMAGE_NAME_WEB}:${IMAGE_TAG}
+    container_name: ${PROJECT_NAME}-${IMAGE_NAME_WEB}
+    hostname: ${PROJECT_NAME}-${IMAGE_NAME_WEB}-nginx
     environment:
       - NGINX_ENVSUBST_FILTER=^NGINX_.*|^OTEL_.*|^FASTCGI_.*
 
-      - NGINX_LISTEN_PORT	
+      - NGINX_LISTEN_PORT=8080
       - NGINX_PROXY_READ_TIMEOUT=300
       - NGINX_PROXY_CONNECT_TIMEOUT=300
       - NGINX_PROXY_SEND_TIMEOUT=300
@@ -33,24 +33,34 @@ services:
       - app
 
   app:
-    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/app-otel:${IMAGE_TAG}
-    container_name: ${PROJECT_NAME}-app
-    hostname: smplapp-app
+    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/${IMAGE_NAME_APP}:${IMAGE_TAG}
+    container_name: ${PROJECT_NAME}-${IMAGE_NAME_APP}
+    hostname: ${PROJECT_NAME}-${IMAGE_NAME_APP}-phpfpm
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
+      - DEV_ENABLED=1   # switch php-ini & php-fpm, www-conf
+      # Xdebug
       - XDEBUG_ENABLED=1
       - XDEBUG_CLIENT_HOST=host.docker.internal  # default
       #- XDEBUG_REMOTE_HOST=host.k3d.internal # for local k3d
       - XDEBUG_CLIENT_PORT=9003
-      - DEV_ENABLED=1
+      # php-fpm tuning if needed
+      - PM_MAX_CHILDREN=5
+      - PM_START_SERVERS=2
+      - PM_MIN_SPARE_SERVERS=1
+      - PM_MAX_SPARE_SERVERS=2
+      - PM_MAX_SPAWN_RATE=2
+      - PM_PROCESS_IDLE_TIMEOUT=10s
+      - PM_MAX_REQUESTS=500
+      # open-telemetry
       - OTEL_PHP_AUTOLOAD_ENABLED=true
       - OTEL_SERVICE_NAME=${PROJECT_NAME}-app
       #- OTEL_TRACES_EXPORTER=otlp
       #- OTEL_TRACES_EXPORTER=console
       - OTEL_TRACES_EXPORTER=none
       #- OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-      #TRANSPORTER PROTOCOLS: http/json, http/protobuf, grpc
+      # TRANSPORTER PROTOCOLS: http/json, http/protobuf, grpc
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.tracing.svc.cluster.local:4317 #grpc
       #- OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.tracing.svc.cluster.local:4318 #http/json
@@ -60,6 +70,12 @@ services:
       - OTEL_METRICS_EXPORTER=console
       - OTEL_LOGS_EXPORTER=none
       - OTEL_PROPAGATORS="baggage,tracecontext"
+      # extra env vars
+      - APP_JHOTEL_DBHOST=""
+      - APP_JHOTEL_DBPORT=5432
+      - APP_JHOTEL_DBNAME=""
+      - APP_JHOTEL_DBUSER=""
+      - APP_JHOTEL_DBPASS=""
     volumes:
       - fpm_shared:/var/run/php-fpm
       - ./webapp:/var/www/webapp

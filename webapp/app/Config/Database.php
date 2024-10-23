@@ -7,6 +7,11 @@ use CodeIgniter\Database\Config;
 /**
  * Database Configuration
  */
+define('APP_JHOTEL_DBHOST', getenv('APP_JHOTEL_DBHOST'));
+define('APP_JHOTEL_DBPORT', getenv('APP_JHOTEL_DBPORT'));
+define('APP_JHOTEL_DBNAME', getenv('APP_JHOTEL_DBNAME'));
+define('APP_JHOTEL_DBUSER', getenv('APP_JHOTEL_DBUSER'));
+define('APP_JHOTEL_DBPASS', getenv('APP_JHOTEL_DBPASS'));
 class Database extends Config
 {
     /**
@@ -24,31 +29,31 @@ class Database extends Config
      *
      * @var array<string, mixed>
      */
-    public array $default = [
-        'DSN'          => '',
-        'hostname'     => 'localhost',
-        'username'     => '',
-        'password'     => '',
-        'database'     => '',
-        'DBDriver'     => 'MySQLi',
-        'DBPrefix'     => '',
-        'pConnect'     => false,
-        'DBDebug'      => true,
-        'charset'      => 'utf8mb4',
-        'DBCollat'     => 'utf8mb4_general_ci',
-        'swapPre'      => '',
-        'encrypt'      => false,
-        'compress'     => false,
-        'strictOn'     => false,
-        'failover'     => [],
-        'port'         => 3306,
-        'numberNative' => false,
-        'dateFormat'   => [
-            'date'     => 'Y-m-d',
-            'datetime' => 'Y-m-d H:i:s',
-            'time'     => 'H:i:s',
-        ],
-    ];
+    //public array $default = [
+    //    'DSN'          => '',
+    //    'hostname'     => 'localhost',
+    //    'username'     => '',
+    //    'password'     => '',
+    //    'database'     => '',
+    //    'DBDriver'     => 'MySQLi',
+    //    'DBPrefix'     => '',
+    //    'pConnect'     => false,
+    //    'DBDebug'      => true,
+    //    'charset'      => 'utf8mb4',
+    //    'DBCollat'     => 'utf8mb4_general_ci',
+    //    'swapPre'      => '',
+    //    'encrypt'      => false,
+    //    'compress'     => false,
+    //    'strictOn'     => false,
+    //    'failover'     => [],
+    //    'port'         => 3306,
+    //    'numberNative' => false,
+    //    'dateFormat'   => [
+    //        'date'     => 'Y-m-d',
+    //        'datetime' => 'Y-m-d H:i:s',
+    //        'time'     => 'H:i:s',
+    //    ],
+    //];
 
     //    /**
     //     * Sample database connection for SQLite3.
@@ -71,32 +76,32 @@ class Database extends Config
     //        ],
     //    ];
 
-    //    /**
-    //     * Sample database connection for Postgre.
-    //     *
-    //     * @var array<string, mixed>
-    //     */
-    //    public array $default = [
-    //        'DSN'        => '',
-    //        'hostname'   => 'localhost',
-    //        'username'   => 'root',
-    //        'password'   => 'root',
-    //        'database'   => 'ci4',
-    //        'schema'     => 'public',
-    //        'DBDriver'   => 'Postgre',
-    //        'DBPrefix'   => '',
-    //        'pConnect'   => false,
-    //        'DBDebug'    => true,
-    //        'charset'    => 'utf8',
-    //        'swapPre'    => '',
-    //        'failover'   => [],
-    //        'port'       => 5432,
-    //        'dateFormat' => [
-    //            'date'     => 'Y-m-d',
-    //            'datetime' => 'Y-m-d H:i:s',
-    //            'time'     => 'H:i:s',
-    //        ],
-    //    ];
+    /**
+     * Sample database connection for Postgre.
+     *
+     * @var array<string, mixed>
+     */
+    public array $default = [
+        'DSN'        => 'pgsql:host='.APP_JHOTEL_DBHOST.';dbname='.APP_JHOTEL_DBNAME.';user='.APP_JHOTEL_DBUSER.';password='.APP_JHOTEL_DBPASS,
+        'hostname'   => APP_JHOTEL_DBHOST,
+        'username'   => APP_JHOTEL_DBUSER,
+        'password'   => APP_JHOTEL_DBPASS,
+        'database'   => APP_JHOTEL_DBNAME,
+        'schema'     => 'public',
+        'DBDriver'   => 'Postgre',
+        'DBPrefix'   => '',
+        'pConnect'   => false,
+        'DBDebug'    => true,
+        'charset'    => 'utf8',
+        'swapPre'    => '',
+        'failover'   => [],
+        'port'       => APP_JHOTEL_DBPORT,
+        'dateFormat' => [
+            'date'     => 'Y-m-d',
+            'datetime' => 'Y-m-d H:i:s',
+            'time'     => 'H:i:s',
+        ],
+    ];
 
     //    /**
     //     * Sample database connection for SQLSRV.
@@ -160,32 +165,32 @@ class Database extends Config
      *
      * @var array<string, mixed>
      */
-    public array $tests = [
-        'DSN'         => '',
-        'hostname'    => '127.0.0.1',
-        'username'    => '',
-        'password'    => '',
-        'database'    => ':memory:',
-        'DBDriver'    => 'SQLite3',
-        'DBPrefix'    => 'db_',  // Needed to ensure we're working correctly with prefixes live. DO NOT REMOVE FOR CI DEVS
-        'pConnect'    => false,
-        'DBDebug'     => true,
-        'charset'     => 'utf8',
-        'DBCollat'    => '',
-        'swapPre'     => '',
-        'encrypt'     => false,
-        'compress'    => false,
-        'strictOn'    => false,
-        'failover'    => [],
-        'port'        => 3306,
-        'foreignKeys' => true,
-        'busyTimeout' => 1000,
-        'dateFormat'  => [
-            'date'     => 'Y-m-d',
-            'datetime' => 'Y-m-d H:i:s',
-            'time'     => 'H:i:s',
-        ],
-    ];
+    //public array $tests = [
+    //    'DSN'         => '',
+    //    'hostname'    => '127.0.0.1',
+    //    'username'    => '',
+    //    'password'    => '',
+    //    'database'    => ':memory:',
+    //    'DBDriver'    => 'SQLite3',
+    //    'DBPrefix'    => 'db_',  // Needed to ensure we're working correctly with prefixes live. DO NOT REMOVE FOR CI DEVS
+    //    'pConnect'    => false,
+    //    'DBDebug'     => true,
+    //    'charset'     => 'utf8',
+    //    'DBCollat'    => '',
+    //    'swapPre'     => '',
+    //    'encrypt'     => false,
+    //    'compress'    => false,
+    //    'strictOn'    => false,
+    //    'failover'    => [],
+    //    'port'        => 3306,
+    //    'foreignKeys' => true,
+    //    'busyTimeout' => 1000,
+    //    'dateFormat'  => [
+    //        'date'     => 'Y-m-d',
+    //        'datetime' => 'Y-m-d H:i:s',
+    //        'time'     => 'H:i:s',
+    //    ],
+    //];
 
     public function __construct()
     {

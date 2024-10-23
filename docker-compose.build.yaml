@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./containers/nginx/Dockerfile
-    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/web-otel:${IMAGE_TAG}
+    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/${IMAGE_NAME_WEB}:${IMAGE_TAG}
 
   app:
     build:
@@ -13,5 +13,5 @@ services:
         - BUILD_OTEL=${BUILD_OTEL}
         - BUILD_GRPC=${BUILD_GRPC}
         - BUILD_PROTOBUF=${BUILD_PROTOBUF}
-    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/app-otel:${IMAGE_TAG}
+    image: ${CONTAINER_REGISTRY}${PROJECT_NAME}/${IMAGE_NAME_APP}:${IMAGE_TAG}
 

@@ -3,11 +3,14 @@
 ##### set env & shell functions #####
 export PROJECT_NAME='smplapp-a'
 export CONTAINER_REGISTRY='harbor.dh1.div1.opendoor.local/'
+export IMAGE_NAME_WEB='web-otel'
+export IMAGE_NAME_APP='app-otel'
+export IMAGE_TAG=''
 export NGINX_SERVICE_NAME='web'
 export PHP_SERVICE_NAME='app'
 
 # for container commands
-export CMD_ENV=''  # set "k8s" for k3d environment
+export CMD_ENV='k8s'  # set "k8s" for kubernetes environment, otherwise empty.
 export K8S_NAMESPACE='smplapp'
 export K8S_DEPLOYMENT_NAME='smplapp-phpfpm'
 
@@ -51,7 +54,7 @@ get_new_image_tag() {
 get_locallatest_image_tag(){
   local IMAGE_TAG
   #IMAGE_TAG=$(docker images | grep ${CONTAINER_REGISTRY}${PROJECT_NAME} | awk '{print $2}' | grep -E '^[0-9]{8}-[0-9a-z]{6}' | sort -r | head -n 1)
-  IMAGE_TAG=$(docker images --format "table {{.Tag}}" ${CONTAINER_REGISTRY}${PROJECT_NAME} | grep -E '^[0-9]{8}-[0-9a-z]{7}' | sort -r | head -n 1)
+  IMAGE_TAG=$(docker images --format "table {{.Tag}}" ${CONTAINER_REGISTRY}${PROJECT_NAME}/* | grep -E '^[0-9]{8}-[0-9a-z]{7}' | sort -r | head -n 1)
   if [ -z "${IMAGE_TAG}" ]; then
     IMAGE_TAG=$(docker images | grep "${CONTAINER_REGISTRY}${PROJECT_NAME}" | grep -E '^[0-9]{8}' | sort -r | head -n 1)
   fi
@@ -68,8 +71,12 @@ determin_image_tag(){
   fi
   echo "${IMAGE_TAG}"
 }
-export IMAGE_TAG=`determin_image_tag "${1}"`
-echo "use IMAGE_TAG:${IMAGE_TAG}"
+if [ -z "${IMAGE_TAG}" ]; then
+  export IMAGE_TAG=`determin_image_tag "${1}"`
+  echo "use IMAGE_TAG:${IMAGE_TAG}"
+else
+  echo "use predefined IMAGE_TAG:${IMAGE_TAG}"
+fi
 
 
 ################################################################################
@@ -94,7 +101,7 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 container_exec() {
   local CMD="$@"
   if [ "${CMD_ENV}" = 'k8s' ]; then
-    kubectl exec deployment/${K8S_DEPLOYMENT_NAME} -n ${K8S_NAMESPACE} -- sh -l -c "${CMD}"
+    kubectl exec deployment/${K8S_DEPLOYMENT_NAME} -n ${K8S_NAMESPACE} -it -- sh -l -c "${CMD}"
     return $?
   else
     docker compose exec -u ${UID} ${PHP_SERVICE_NAME} sh -l -c "${CMD}"
@@ -111,3 +118,15 @@ php() {
   container_exec "${FUNCNAME[0]} $@"
   return $?
 }
+
+# generate php command wrapper
+create_wrapper() {
+  echo '#!/bin/bash' > ./php
+  declare -x > ./php
+  declare -f container_exec >> ./php
+  declare -f php >> ./php
+  echo "pushd ${PWD} >/dev/null >&1" >> ./php
+  echo "php \"\$@\"" >> ./php
+  chmod +x ./php
+}
+
