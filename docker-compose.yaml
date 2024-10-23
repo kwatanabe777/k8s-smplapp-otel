@@ -69,13 +69,13 @@ services:
       #- OTEL_METRICS_EXPORTER=otlp
       - OTEL_METRICS_EXPORTER=console
       - OTEL_LOGS_EXPORTER=none
-      - OTEL_PROPAGATORS="baggage,tracecontext"
+      - OTEL_PROPAGATORS=baggage,tracecontext
       # extra env vars
-      - APP_JHOTEL_DBHOST=""
+      - APP_JHOTEL_DBHOST=
       - APP_JHOTEL_DBPORT=5432
-      - APP_JHOTEL_DBNAME=""
-      - APP_JHOTEL_DBUSER=""
-      - APP_JHOTEL_DBPASS=""
+      - APP_JHOTEL_DBNAME=
+      - APP_JHOTEL_DBUSER=
+      - APP_JHOTEL_DBPASS=
     volumes:
       - fpm_shared:/var/run/php-fpm
       - ./webapp:/var/www/webapp
