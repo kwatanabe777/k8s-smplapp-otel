@@ -63,7 +63,7 @@ get_locallatest_git_datecommithash() {
 date_localepoch() {
   # delete extra timezone
   local CUT_EXTRA="$(echo ${@} | awk '{print $1,$2,$3}')"
-  # local epoch time 
+  # local epoch time
   echo $(date -d "${CUT_EXTRA}" '+%s')
 }
 
@@ -97,7 +97,7 @@ determin_image_tag(){
     echo -n 'found commithash, ' >&2
 
   elif [ -n "${CACHE_DATETAG}" -a -z "${GIT_DATEHASH}" ]; then
-    IMAGE_TAG=$(echo "${CACHE_DATETAG}" | awk -F, '{print $2}') 
+    IMAGE_TAG=$(echo "${CACHE_DATETAG}" | awk -F, '{print $2}')
     echo -n 'found localimagecache, ' >&2
 
   elif [ -n "${CACHE_DATETAG}" -a -n "${GIT_DATEHASH}" ]; then

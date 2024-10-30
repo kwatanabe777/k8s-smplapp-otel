@@ -15,8 +15,8 @@ XDEBUG_CLIENT_PORT=${XDEBUG_CLIENT_PORT:-9003}
 if [ ${XDEBUG_ENABLED} -eq 1 ]; then
     echo "xdebug is enabled" >&2
     sed -i "s/^;\(zend_extension=xdebug.*\)/\1/" ${PHP_CONF_DIR}/conf.d/docker-php-ext-xdebug.ini
-	sed -i "s/^\(xdebug.client_host =\).*/\1 ${XDEBUG_CLIENT_HOST}/" ${PHP_CONF_DIR}/conf.d/docker-php-ext-xdebug.ini
-	sed -i "s/^\(xdebug.client_port =\).*/\1 ${XDEBUG_CLIENT_PORT}/" ${PHP_CONF_DIR}/conf.d/docker-php-ext-xdebug.ini
+    sed -i "s/^\(xdebug.client_host =\).*/\1 ${XDEBUG_CLIENT_HOST}/" ${PHP_CONF_DIR}/conf.d/docker-php-ext-xdebug.ini
+    sed -i "s/^\(xdebug.client_port =\).*/\1 ${XDEBUG_CLIENT_PORT}/" ${PHP_CONF_DIR}/conf.d/docker-php-ext-xdebug.ini
 else
     echo "xdebug is disabled" >&2
     sed -i "s/^\(zend_extension=xdebug.*\)/;\1/" ${PHP_CONF_DIR}/conf.d/docker-php-ext-xdebug.ini
@@ -39,7 +39,7 @@ else
     ln -sf ${PHP_CONF_DIR}/php.ini-add-production ${PHP_CONF_DIR}/conf.d/php.ini-add-z-alt.ini
     ln -sf ${PHPFPM_CONF_DIR}/www.conf-production ${PHPFPM_CONF_DIR}/www.conf-alt
 fi
-# rewrite php-fpm:www.conf extra tunings 
+# rewrite php-fpm:www.conf extra tunings
 if [ -n "${PM_MAX_CHILDREN}" ]; then
     sed -i "s/^\(pm\.max_children =\).*/\1 ${PM_MAX_CHILDREN}/" ${PHPFPM_CONF_DIR}/www.conf-alt
 fi

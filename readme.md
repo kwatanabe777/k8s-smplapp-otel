@@ -1,6 +1,6 @@
 # php-fpm containers sample
                                                                     by kwatanabe
-                                                                    last updated:2024-10-24 16:04.
+                                                                    last updated:2024-10-30 21:20.
 
 ## Overview
 - php-fpm & nginx containers with opentelemetry extension(with grpc/protobuf)
@@ -141,7 +141,7 @@ make push
   - fastcgi_params-laravel-production  
     APP_ENV=production
   - empty  
-	no additional parameters
+  no additional parameters
   - fastcgi_params-common  
     fastcgi_params-common is always included
 
