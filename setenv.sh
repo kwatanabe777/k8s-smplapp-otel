@@ -5,12 +5,12 @@ export PROJECT_NAME='smplapp-a'
 export CONTAINER_REGISTRY='harbor.dh1.div1.opendoor.local/'
 export IMAGE_NAME_WEB='web-otel'
 export IMAGE_NAME_APP='app-otel'
-export IMAGE_TAG=''
+#export IMAGE_TAG=''
 export NGINX_SERVICE_NAME='web'
 export PHP_SERVICE_NAME='app'
 
 # for container commands
-export CMD_ENV='k8s'  # set "k8s" for kubernetes environment, otherwise empty.
+export CMD_ENV=''  # set "k8s" for kubernetes environment, otherwise empty.
 export K8S_NAMESPACE='smplapp'
 export K8S_DEPLOYMENT_NAME='smplapp-phpfpm'
 
@@ -31,51 +31,103 @@ export BUILD_PROTOBUF=1
 
 
 ################################################################################
-# gen & set image-tag
+# auto IMAGE_TAG generation
 #
-#もし、gitのcommit hashが取れない場合は、日付のみでタグを生成する。
-#そうでない場合は、日付とcommit hashの組み合わせでタグを生成するが、
-#既にローカルimageキャッシュがある場合は、その最新のtagを取得する。
-#If you cannot get the git commit hash, generate a tag with only the date.
-#If not, generate a tag with a combination of date and commit hash, but
-#If there is already a local image cache, get its latest tag.
+# 環境変数:IMAGE_TAGが既に設定されていればそれを使用する。
+# そうでなければ、以下の優先順位でTAGを生成する。
+#  gitのcommit hashが存在する場合は、YYYYMMDD-commithashでTAGを生成する。
+#  既にローカルimageキャッシュがある場合は、latest以外の最新(降順の最初)のTAGを利用する。
+#  両方存在する場合は新しい方を利用する。
+#  そうでない場合は、日付:YYYYMMDDでTAGを生成する
+# If the environment variable:IMAGE_TAG is already set, use it.
+# Otherwise, generate TAG in the following order of precedence.
+#  If you in the git working directory, use YYYYMMDD-commithash to generate TAG.
+#  If there is already a local image cache, use the latest TAG(first in descending order) other than 'latest'.
+#  If both exist, use the newest one.
+#  Otherwise, generate a TAG from the only date: YYYYYMMDD.
 
-get_new_image_tag() {
-  local IMAGE_TAG
-  local DATE=`date '+%Y%m%d'`
-  local COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
-  if [ -n "${COMMIT_HASH}" ]; then
-    IMAGE_TAG=${DATE}-${COMMIT_HASH}
+get_date() {
+  echo `date '+%Y%m%d'`
+}
+
+get_locallatest_image_datetag(){
+  # get latest local imagecache date and tag
+  echo $(docker images --format "table {{.CreatedAt}},{{.Tag}}" ${CONTAINER_REGISTRY}${PROJECT_NAME}/* | awk 'NR>1' | sort -r | grep -v latest | head -n1)
+}
+
+get_locallatest_git_datecommithash() {
+  # get latest date and commit hash(short)
+  echo $(git log -1 --format='%ci,%h' 2>/dev/null)
+}
+
+date_localepoch() {
+  # delete extra timezone
+  local CUT_EXTRA="$(echo ${@} | awk '{print $1,$2,$3}')"
+  # local epoch time 
+  echo $(date -d "${CUT_EXTRA}" '+%s')
+}
+
+date_ymd() {
+  echo $(date -d "@$(date_localepoch ${@})" '+%Y%m%d')
+}
+
+compare_date() {
+  local DATE1=${1}
+  local DATE2=${2}
+  if [ ${DATE1} -gt ${DATE2} ]; then
+    echo "1"
+  elif [ ${DATE1} -lt ${DATE2} ]; then
+    echo "-1"
   else
-    IMAGE_TAG=${DATE}
+    echo "0"
   fi
-  echo "${IMAGE_TAG}"
 }
-get_locallatest_image_tag(){
-  local IMAGE_TAG
-  #IMAGE_TAG=$(docker images | grep ${CONTAINER_REGISTRY}${PROJECT_NAME} | awk '{print $2}' | grep -E '^[0-9]{8}-[0-9a-z]{6}' | sort -r | head -n 1)
-  IMAGE_TAG=$(docker images --format "table {{.Tag}}" ${CONTAINER_REGISTRY}${PROJECT_NAME}/* | grep -E '^[0-9]{8}-[0-9a-z]{7}' | sort -r | head -n 1)
-  if [ -z "${IMAGE_TAG}" ]; then
-    IMAGE_TAG=$(docker images | grep "${CONTAINER_REGISTRY}${PROJECT_NAME}" | grep -E '^[0-9]{8}' | sort -r | head -n 1)
-  fi
-  IMAGE_TAG=${IMAGE_TAG:-`get_new_image_tag`} #fallback
-  echo "${IMAGE_TAG}"
-}
+
 determin_image_tag(){
-  local ARG=$1
+  local CACHE_DATETAG=$(get_locallatest_image_datetag)
+  local CACHE_DATE=$(echo "${CACHE_DATETAG}" | awk -F, '{print $1}')
+  local GIT_DATEHASH=$(get_locallatest_git_datecommithash)
+  local GIT_DATE=$(echo "${GIT_DATEHASH}" | awk -F, '{print $1}')
+  local CMP_RESULT
+  local DATE=$(get_date)
   local IMAGE_TAG
-  if [ "${ARG}" = "new" ]; then
-    IMAGE_TAG=`get_new_image_tag`
-  else
-    IMAGE_TAG=`get_locallatest_image_tag`
+
+  if [ -n "${GIT_DATEHASH}" -a -z "${CACHE_DATETAG}" ]; then
+    IMAGE_TAG=$(date_ymd ${GIT_DATE})-$(echo "${GIT_DATEHASH}" | awk -F, '{print $2}')
+    echo -n 'found commithash, ' >&2
+
+  elif [ -n "${CACHE_DATETAG}" -a -z "${GIT_DATEHASH}" ]; then
+    IMAGE_TAG=$(echo "${CACHE_DATETAG}" | awk -F, '{print $2}') 
+    echo -n 'found localimagecache, ' >&2
+
+  elif [ -n "${CACHE_DATETAG}" -a -n "${GIT_DATEHASH}" ]; then
+    echo -n 'set newertag ' >&2
+    CMP_RESULT=$(compare_date $(date_localepoch "${GIT_DATE}") $(date_localepoch "${CACHE_DATE}") )
+    if [ "${CMP_RESULT}" -eq 1 ]; then
+      IMAGE_TAG=$(date_ymd "${GIT_DATE}")-$(echo "${GIT_DATEHASH}" | awk -F, '{print $2}')
+      echo -n '(commithash), ' >&2
+    elif [ "${CMP_RESULT}" -eq -1 ]; then
+      IMAGE_TAG=$(echo "${CACHE_DATETAG}" | awk -F, '{print $2}')
+      echo -n '(localimagecache), ' >&2
+    fi
+
+  elif [ -z "${CACHE_DATETAG}" -a -z "${GIT_DATEHASH}" ]; then
+    IMAGE_TAG=${DATE}
+    echo -n 'no taginfo ' >&2
   fi
+
   echo "${IMAGE_TAG}"
 }
-if [ -z "${IMAGE_TAG}" ]; then
-  export IMAGE_TAG=`determin_image_tag "${1}"`
-  echo "use IMAGE_TAG:${IMAGE_TAG}"
-else
+
+if [ -n "${IMAGE_TAG}" ]; then
   echo "use predefined IMAGE_TAG:${IMAGE_TAG}"
+else
+  IMAGE=$(determin_image_tag)
+  echo "use auto IMAGE_TAG:${IMAGE}"
+  # if called by make, export IMAGE_TAG
+  if [ "$(ps -o command --no-header $PPID | awk '{print $1}')" = 'make' ]; then
+    export IMAGE_TAG=${IMAGE}
+  fi
 fi
 
 
@@ -104,7 +156,7 @@ container_exec() {
     kubectl exec deployment/${K8S_DEPLOYMENT_NAME} -n ${K8S_NAMESPACE} -it -- sh -l -c "${CMD}"
     return $?
   else
-    docker compose exec -u ${UID} ${PHP_SERVICE_NAME} sh -l -c "${CMD}"
+    IMAGE_TAG=${IMAGE} docker compose exec -u ${UID} ${PHP_SERVICE_NAME} sh -l -c "${CMD}"
     return $?
   fi
 }

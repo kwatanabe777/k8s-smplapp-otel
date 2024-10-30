@@ -1,6 +1,6 @@
 # php-fpm containers sample
                                                                     by kwatanabe
-                                                                    last updated:2024-10-23 15:23.
+                                                                    last updated:2024-10-24 16:04.
 
 ## Overview
 - php-fpm & nginx containers with opentelemetry extension(with grpc/protobuf)
@@ -11,21 +11,26 @@
 
 
 ## Development only (if container registry already has images)
-if use remote registry, setenv.sh is needed to be configured.
+if use remote registry, setenv.sh is needed to be configured.  
+(YYYYMMDD-\<commit-short-hash\> or YYYYMMDD is for the first time)  
 ```
 PROJECT_NAME=
 CONTAINER_REGISTRY=
 IMAGE_NAME_WEB=
 IMAGE_NAME_APP=
-IMAGE_TAG=
 ```
-IMAGE_TAG is autoconfigured if not set.  
-But, If the local image cache is empty and the image is to be retrieved remotely, such as the first time pull, IMAGE_TAG must be set.  
+Container Registry & IMAGE_TAG is automatically configured if not set by running it via the make command.  
 IMAGE_TAG is common for both web & app images.
 
 - pull & up containers  
 ```bash
 make up
+```
+If the local image cache is empty and the image is to be retrieved remotely, such as the first time pull, IMAGE_TAG must be set.  
+```bash
+make up IMAGE_TAG=YYYYMMDD
+or
+IMAGE_TAG=YYYYMMDD make up
 ```
 
 - down containers  
@@ -86,15 +91,22 @@ make build
 > default image tag: YYYYMMDD  
 > in git repository: YYYYMMDD-\<commit-short-hash\>  
 
-_configurable in `setenv.sh` by `IMAGE_TAG`_  
+_also configurable by runtime_  
+```bash
+make build IMAGE_TAG=YYYYMMDD
+or
+IMAGE_TAG=YYYYMMDD make build
+```
 **:latest** tag is also created.
 
 ### Push image to registry
 registry & project is defined in setenv.sh  
 project_name is container registry project name such as `gcr.io/xxxxx`.
 ```
-CONTAINER_REGISTRY=  
-PROJECT_NAME=  
+CONTAINER_REGISTRY=
+PROJECT_NAME=
+IMAGE_NAME_WEB=
+IMAGE_NAME_APP=
 ```
 ```
 make login USER=xxx PASSWORD=xxx

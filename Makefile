@@ -5,7 +5,7 @@
 SHELL := /bin/bash #/bin/sh cannnot receive args at . ./setenv.sh
 # create webapp/public directory temporarily for build nginx container
 build:
-	@. ./setenv.sh new \
+	@. ./setenv.sh \
     && set +a \
     && mkdir -p webapp/public \
     && docker compose -f docker-compose.build.yaml build \

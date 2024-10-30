@@ -1,4 +1,4 @@
-FROM nginx:1.27.0-alpine-otel
+FROM nginx:1.27.2-alpine-otel
 
 ##### configuration for non-root user boot (for rewriting by entrypoint)
 #COPY ./conf.d/default.conf /etc/nginx/conf.d/default.conf
